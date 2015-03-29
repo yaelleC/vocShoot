@@ -12,7 +12,7 @@ using System.Text.RegularExpressions;
 public class UIManagerScript : MonoBehaviour {
 
 	public EngAGe engage;
-	public const int idSG = 92;
+	public const int idSG = 98;
 
 	// MenuScene
 	public Animator startButton;
@@ -46,12 +46,9 @@ public class UIManagerScript : MonoBehaviour {
 	// game scene
 	public Text txtFeedback;
 	public MouseController mouseC;
-	public Texture2D coinIconTexture;
-	public Texture2D livesIconTexture;
-	public Texture2D euIconTexture;
 	
-	public Text pointsLabel;
-	public Text euLabel;
+	public Text pointsFRtoENLabel;
+	public Text pointsENtoFRLabel;
 	public GameObject restartWinDialog;
 	public GameObject restartLoseDialog;
 	
@@ -259,9 +256,11 @@ public class UIManagerScript : MonoBehaviour {
 		feedbackDialog.SetActive (!feedbackDialog.activeSelf);
 		if (feedbackDialog.activeSelf)
 		{
-			mouseC.pause();
+			Time.timeScale = 0;
+			//mouseC.pause();
 		} else {
-			mouseC.unpause();
+			Time.timeScale = 1;
+			//mouseC.unpause();
 		}
 	}
 	
@@ -285,13 +284,13 @@ public class UIManagerScript : MonoBehaviour {
 			string scoreName = score["name"];
 			string scoreValue = score["value"];
 			
-			if (string.Equals(scoreName, "eu_score"))
+			if (string.Equals(scoreName, "englishToFrench"))
 			{
-				pointsLabel.text = float.Parse(scoreValue).ToString();
+				pointsENtoFRLabel.text = float.Parse(scoreValue).ToString();
 			}
-			else if (string.Equals(scoreName, "eu_countries"))
+			else if (string.Equals(scoreName, "frenchToEnglish"))
 			{
-				euLabel.text = float.Parse(scoreValue).ToString();
+				pointsFRtoENLabel.text = float.Parse(scoreValue).ToString();
 			}
 			else if (string.Equals(scoreName, "lives"))
 			{

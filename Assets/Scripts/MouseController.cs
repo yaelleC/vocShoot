@@ -59,7 +59,7 @@ public class MouseController : MonoBehaviour {
 			// create a JSON with one value, "country" (only parameter of countryReSelected)
 			JSONNode values = JSON.Parse("{ \"country\" : \"" + spr_flag.name + "\" }");
 			// ask EngAGe to assess the action based on the config file
-			StartCoroutine(engage.assess("countryReSelected", values));
+			StartCoroutine(engage.assess("countryReSelected", values, UpdateFeedbackAndScore));
 		}
 		// country selected for the first time
 		else
@@ -67,12 +67,16 @@ public class MouseController : MonoBehaviour {
 			// create a JSON with one value, "country" (only parameter of newCountrySelected)
 			JSONNode values = JSON.Parse("{ \"country\" : \"" + spr_flag.name + "\" }");
 			// ask EngAGe to assess the action based on the config file
-			StartCoroutine(engage.assess("newCountrySelected", values));
+			StartCoroutine(engage.assess("newCountrySelected", values, UpdateFeedbackAndScore));
 		}
 		// save country selected
 		countriesFound.Add (spr_flag.name);
 
 		flagCollider.gameObject.SetActive (false);
+	}
+
+	void UpdateFeedbackAndScore(JSONNode returnData)
+	{
 	}
 
 	void FixedUpdate () 
@@ -82,13 +86,13 @@ public class MouseController : MonoBehaviour {
 
 		if (jetpackActive)
 		{
-			rigidbody2D.AddForce(new Vector2(0, jetpackForce));
+			GetComponent<Rigidbody2D>().AddForce(new Vector2(0, jetpackForce));
 		}
 		if (!endWin && !endLose)
 		{
-			Vector2 newVelocity = rigidbody2D.velocity;
+			Vector2 newVelocity = GetComponent<Rigidbody2D>().velocity;
 			newVelocity.x = forwardMovementSpeed;
-			rigidbody2D.velocity = newVelocity;
+			GetComponent<Rigidbody2D>().velocity = newVelocity;
 		}
 		else if (endWin) 
 		{
