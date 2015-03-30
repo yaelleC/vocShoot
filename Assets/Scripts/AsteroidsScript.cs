@@ -5,6 +5,7 @@ using SimpleJSON;
 public class AsteroidsScript : MonoBehaviour {
 
 	public GameObject wordPanel;
+	public AudioClip hitSound;
 
 	// Use this for initialization
 	void Start () {
@@ -23,7 +24,8 @@ public class AsteroidsScript : MonoBehaviour {
 	void OnTriggerEnter2D(Collider2D collider)
 	{
 		if (collider.gameObject.CompareTag ("Fireball")) 
-		{			
+		{		
+			AudioSource.PlayClipAtPoint(hitSound, transform.position);	
 			Destroy (gameObject);
 			Destroy (collider.gameObject);
 		}

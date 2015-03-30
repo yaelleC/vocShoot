@@ -12,7 +12,7 @@ using System.Text.RegularExpressions;
 public class UIManagerScript : MonoBehaviour {
 
 	public EngAGe engage;
-	public const int idSG = 98;
+	public const int idSG = 101;
 
 	// MenuScene
 	public Animator startButton;
@@ -45,7 +45,8 @@ public class UIManagerScript : MonoBehaviour {
 
 	// game scene
 	public Text txtFeedback;
-	public MouseController mouseC;
+	public PlanetScript planet;
+	public GenerateAsteroidScript astScript;
 	
 	public Text pointsFRtoENLabel;
 	public Text pointsENtoFRLabel;
@@ -113,6 +114,7 @@ public class UIManagerScript : MonoBehaviour {
 		}
 		else if (Application.loadedLevelName.Equals("GameScene"))
 		{
+			StartCoroutine(engage.getGameDesc(idSG));
 			restartWinDialog.SetActive(false);
 			restartLoseDialog.SetActive(false);
 			feedbackDialog.SetActive (false);
@@ -228,12 +230,12 @@ public class UIManagerScript : MonoBehaviour {
 		JSONNode leaderboard = engage.getLeaderboardList ();
 		
 		// look only at the eu_score 
-		JSONArray euScorePerf = leaderboard ["eu_score"].AsArray;
+		JSONArray overallScorePerf = leaderboard ["overallScore"].AsArray;
 		
 		// display up to 10 best gameplays
 		int max = 10;
 		txt_listBestPlayers.text = "";
-		foreach (JSONNode gameplay in euScorePerf)
+		foreach (JSONNode gameplay in overallScorePerf)
 		{
 			if (max-- > 0)
 			{
@@ -257,17 +259,15 @@ public class UIManagerScript : MonoBehaviour {
 		if (feedbackDialog.activeSelf)
 		{
 			Time.timeScale = 0;
-			//mouseC.pause();
 		} else {
 			Time.timeScale = 1;
-			//mouseC.unpause();
 		}
 	}
 	
 	public void CloseFeedback()
 	{
 		feedbackDialog.SetActive (false);
-		mouseC.unpause();
+		Time.timeScale = 1;
 	}
 
 	public void ExitToMenu()
@@ -292,27 +292,36 @@ public class UIManagerScript : MonoBehaviour {
 			{
 				pointsFRtoENLabel.text = float.Parse(scoreValue).ToString();
 			}
-			else if (string.Equals(scoreName, "lives"))
+			else if (string.Equals(scoreName, "health"))
 			{
 				float livesFloat = float.Parse(scoreValue);
 				int lives = Mathf.RoundToInt(livesFloat);
 				
-				life3.gameObject.SetActive(lives > 2);
-				life2.gameObject.SetActive(lives > 1);
+				life3.gameObject.SetActive(lives > 66);
+				life2.gameObject.SetActive(lives > 33);
 				life1.gameObject.SetActive(lives > 0);
 			}
 		}
 	}
 
-	public void ReceiveScore()
+	public void UpdateFeedbackAndScore(JSONNode returnData)
 	{
 		UpdateScores ();
+		ReceiveFeedback ();
 	}
 
 	public void ReceiveFeedback()
 	{
 		foreach (JSONNode f in engage.getFeedback())
 		{
+			// check if feedback is adaptation
+			if (string.Equals( f["type"], "ADAPTATION"))
+			{
+				if (string.Equals(f["name"], "speedGame"))
+					astScript.speedGame();
+				if (string.Equals(f["name"], "slowGame"))
+					astScript.slowGame();
+			}
 			// set color to write line into
 			string color = "black";
 			if (string.Equals( f["type"], "POSITIVE"))
@@ -326,13 +335,13 @@ public class UIManagerScript : MonoBehaviour {
 			if (string.Equals(f["final"], "lose"))
 			{
 				StartCoroutine (engage.endGameplay(false));
-				mouseC.loseGame();
+				planet.loseGame();
 				restartLoseDialog.SetActive(true);
 			}
 			else if (string.Equals(f["final"], "win"))
 			{
 				StartCoroutine (engage.endGameplay(true));
-				mouseC.winGame();
+				planet.winGame();
 				restartWinDialog.SetActive(true);
 			}
 		}

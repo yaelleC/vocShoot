@@ -227,10 +227,10 @@ public class EngAGe : MonoBehaviour {
 		// wait for the requst to finish
 		yield return www;
 
-		print ("Gameplay Started! id: " + idGameplay);
 		
 		idGameplay = int.Parse(www.text);
-
+		
+		print ("Gameplay Started! id: " + idGameplay);
 		print ("--- getScores ---");
 		
 		string URL2 = baseURL + "/gameplay/" + idGameplay + "/scores/";

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
+using UnityEngine.EventSystems;using System.Net;
 using System.Collections;
 using System.Collections.Generic;
 using SimpleJSON;
@@ -55,7 +55,7 @@ public class GenerateAsteroidScript : MonoBehaviour {
 		{
 			waitGoal = 1000;
 		}
-		wait = waitGoal;
+		wait = waitGoal-20;
 	}
 	
 	// Update is called once per frame
@@ -64,19 +64,25 @@ public class GenerateAsteroidScript : MonoBehaviour {
 			wait = 0;
 			AddAsteroid ();
 		}
-		wait++;
+		if (Time.timeScale == 1)
+			wait++;
 
 		if(textTranslation.text != "" && Input.GetKey(KeyCode.Return)) 
 		{			
-			// create a JSON with one value, "country" (only parameter of countryReSelected)
-			//JSONNode values = JSON.Parse("{ \"frenchWord\" : \"" + spr_word.name + "\" }");
-			//StartCoroutine(engage.assess("translateFRtoEN", values, UpdateFeedbackAndScore));
-			string wordTyped = textTranslation.text;
+			string wordTyped = textTranslation.text.Trim();
 			foreach (GameObject ast in asteroids)
 			{
-				if (ast != null && ast.name == wordTyped)
+				if (ast != null)
 				{
-					planet.FireBullet(ast.transform.position.x, ast.transform.position.y);
+					string wordToTranslate = ast.name.Split('_')[0];
+					string correctTranslation = ast.name.Split('_')[1];
+					if (wordTyped.Equals(correctTranslation))
+					{
+						JSONNode values = JSON.Parse("{ \"toTranslate\" : \"" + wordToTranslate + "\", " +
+					                             "\"translated\" : \"" + wordTyped + "\" }");
+						StartCoroutine(engage.assess("translation", values, uiScript.UpdateFeedbackAndScore));
+						planet.FireBullet(ast.transform.position.x, ast.transform.position.y);
+					}
 				}
 			}
 			textTranslation.text = "";
@@ -85,10 +91,16 @@ public class GenerateAsteroidScript : MonoBehaviour {
 		}
 	}
 
-	void GenerateObjectsIfRequired()
+	public void speedGame()
 	{
-		if (asteroids.ToArray().Length < 5)
-			AddAsteroid();
+		print ("speed game");
+		waitGoal -= 200;
+	}
+
+	public void slowGame()
+	{
+		print ("slow game");
+		waitGoal += 200;
 	}
 
 	void AddAsteroid()
@@ -97,24 +109,29 @@ public class GenerateAsteroidScript : MonoBehaviour {
 		JSONArray words = new JSONArray ();
 		try
 		{
-			print(gameJSON.ToString());
 			JSONArray reactions = gameJSON["evidenceModel"]["translation"]["reactions"].AsArray;
 			foreach(JSONNode reaction in reactions)
 			{
 				if (reaction["values"] != null)
 				{
-					words.Add(reaction["values"].AsArray);
+					foreach(JSONNode val in reaction["values"].AsArray)
+					{
+						words.Add(val);
+					}
 				}
 			}
 		}
-		catch (UnassignedReferenceException e)
+		catch 
 		{
-			print (e);
+			print ("error");
 		}
-		print (words);
-		string wordToTranslate = "123";
+
+		int randomWord = Random.Range (0, words.Count);
+
+		string wordToTranslate = words[randomWord]["toTranslate"];
+		string correctTranslation = words[randomWord]["translated"];
 		GameObject obj = (GameObject)Instantiate(asteroid);
-		obj.name = wordToTranslate;
+		obj.name = wordToTranslate + "_" + correctTranslation;
 
 		GameObject panel = (GameObject)Instantiate (panelWord);
 		Text text = (Text)Instantiate (textWord);
