@@ -59,6 +59,9 @@ public class UIManagerScript : MonoBehaviour {
 	public Image life2;
 	public Image life3;
 
+	public Image health;
+	private int healthSize;
+
 	private static int difficulty = 2;
 
 	public int getDifficulty()
@@ -102,6 +105,8 @@ public class UIManagerScript : MonoBehaviour {
 			position.y -= transform.rect.height;
 			transform.anchoredPosition = position;
 
+			CloseSettings();
+
 			// close all three windows
 			badgeDialog.SetActive (false);
 			infoDialog.SetActive (false);
@@ -114,18 +119,25 @@ public class UIManagerScript : MonoBehaviour {
 		}
 		else if (Application.loadedLevelName.Equals("GameScene"))
 		{
+			healthSize = Mathf.RoundToInt(health.rectTransform.sizeDelta.x);
+
 			StartCoroutine(engage.getGameDesc(idSG));
+			
 			restartWinDialog.SetActive(false);
 			restartLoseDialog.SetActive(false);
 			feedbackDialog.SetActive (false);
 
 			// Initialise the scores and lives
 			UpdateScores ();
+
+			Time.timeScale = 1;
+
 		}
 	}
 
 	public void GoToMenu()
 	{
+		Time.timeScale = 1;
 		// for each parameter required
 		foreach (JSONNode param in engage.getParameters())
 		{
@@ -141,6 +153,13 @@ public class UIManagerScript : MonoBehaviour {
 			}
 		}
 		Application.LoadLevel("MenuScene");
+	}
+
+	public void RestartGame()
+	{
+		Time.timeScale = 1;
+		//Application.LoadLevel("GameScene");
+		StartCoroutine (engage.startGameplay(idSG, "GameScene"));
 	}
 	
 	public void StartGame()
@@ -200,6 +219,8 @@ public class UIManagerScript : MonoBehaviour {
 	public void OpenBadges()
 	{
 		badgeDialog.SetActive (!badgeDialog.activeSelf);
+		infoDialog.SetActive (false);
+		leaderboardDialog.SetActive (false);
 	}
 	
 	public void CloseBadges()
@@ -218,6 +239,8 @@ public class UIManagerScript : MonoBehaviour {
 			
 		// open the window
 		infoDialog.SetActive (!infoDialog.activeSelf);
+		badgeDialog.SetActive (false);
+		leaderboardDialog.SetActive (false);
 	}
 	
 	public void CloseInfo()
@@ -246,6 +269,8 @@ public class UIManagerScript : MonoBehaviour {
 		}
 		// open the window
 		leaderboardDialog.SetActive (!leaderboardDialog.activeSelf);
+		infoDialog.SetActive (false);
+		badgeDialog.SetActive (false);
 	}
 	
 	public void CloseLeaderboard()
@@ -276,9 +301,7 @@ public class UIManagerScript : MonoBehaviour {
 	}
 
 	public void UpdateScores()
-	{
-		print ("-- Update scores --");
-		
+	{		
 		foreach (JSONNode score in engage.getScores())
 		{
 			string scoreName = score["name"];
@@ -294,12 +317,21 @@ public class UIManagerScript : MonoBehaviour {
 			}
 			else if (string.Equals(scoreName, "health"))
 			{
-				float livesFloat = float.Parse(scoreValue);
-				int lives = Mathf.RoundToInt(livesFloat);
+				float startingValue = float.Parse(score["startingValue"]);
+				float currentValue = float.Parse(scoreValue);
+
+				if (startingValue != 0f)
+				{
+					float newSize = healthSize*(currentValue/startingValue);
+					health.rectTransform.sizeDelta = new Vector2(newSize, 24f); 
+				}
+				/*int lives = Mathf.RoundToInt(livesFloat);
 				
 				life3.gameObject.SetActive(lives > 66);
 				life2.gameObject.SetActive(lives > 33);
-				life1.gameObject.SetActive(lives > 0);
+				life1.gameObject.SetActive(lives > 0);*/
+
+
 			}
 		}
 	}

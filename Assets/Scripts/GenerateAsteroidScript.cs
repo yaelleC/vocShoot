@@ -30,6 +30,8 @@ public class GenerateAsteroidScript : MonoBehaviour {
 	
 	private int wait = 0;
 	private int waitGoal = 1000;
+	private bool justStarted = true;
+	JSONArray availableWords = new JSONArray ();
 
 	// Use this for initialization
 	void Start () {
@@ -45,24 +47,33 @@ public class GenerateAsteroidScript : MonoBehaviour {
 
 		if (uiScript.getDifficulty() == 3)
 		{
-			waitGoal = 500;
+			waitGoal = 600;
 		}
 		else if (uiScript.getDifficulty() == 2)
 		{
-			waitGoal = 800;
+			waitGoal = 900;
 		}
 		else
 		{
-			waitGoal = 1000;
+			waitGoal = 1200;
 		}
 		wait = waitGoal-20;
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		if (wait > waitGoal) {
+		foreach (GameObject ast in asteroids)
+		{
+			if (ast == null)
+			{
+				asteroids.Remove(ast);
+			}
+		}
+
+		if (wait > waitGoal || (asteroids.Count == 0 && !justStarted)) {
 			wait = 0;
 			AddAsteroid ();
+			justStarted = false;
 		}
 		if (Time.timeScale == 1)
 			wait++;
@@ -94,7 +105,7 @@ public class GenerateAsteroidScript : MonoBehaviour {
 	public void speedGame()
 	{
 		print ("speed game");
-		waitGoal -= 200;
+		waitGoal -= 400;
 	}
 
 	public void slowGame()
@@ -105,31 +116,32 @@ public class GenerateAsteroidScript : MonoBehaviour {
 
 	void AddAsteroid()
 	{
-		JSONNode gameJSON = engage.getSG ();
-		JSONArray words = new JSONArray ();
-		try
+		if (justStarted)
 		{
-			JSONArray reactions = gameJSON["evidenceModel"]["translation"]["reactions"].AsArray;
-			foreach(JSONNode reaction in reactions)
+			JSONNode gameJSON = engage.getSG ();
+			try
 			{
-				if (reaction["values"] != null)
+				JSONArray reactions = gameJSON["evidenceModel"]["translation"]["reactions"].AsArray;
+				foreach(JSONNode reaction in reactions)
 				{
-					foreach(JSONNode val in reaction["values"].AsArray)
+					if (reaction["values"] != null)
 					{
-						words.Add(val);
+						foreach(JSONNode val in reaction["values"].AsArray)
+						{
+							availableWords.Add(val);
+						}
 					}
 				}
 			}
+			catch 
+			{
+				print ("error");
+			}
 		}
-		catch 
-		{
-			print ("error");
-		}
+		int randomWord = Random.Range (0, availableWords.Count);
 
-		int randomWord = Random.Range (0, words.Count);
-
-		string wordToTranslate = words[randomWord]["toTranslate"];
-		string correctTranslation = words[randomWord]["translated"];
+		string wordToTranslate = availableWords[randomWord]["toTranslate"];
+		string correctTranslation = availableWords[randomWord]["translated"];
 		GameObject obj = (GameObject)Instantiate(asteroid);
 		obj.name = wordToTranslate + "_" + correctTranslation;
 
@@ -199,7 +211,7 @@ public class GenerateAsteroidScript : MonoBehaviour {
 		transform3.anchoredPosition = new Vector2 (0,0);
 
 		
-		obj.GetComponent<Rigidbody2D> ().velocity = direction * 0.5f;
+		obj.GetComponent<Rigidbody2D> ().velocity = direction * speed * 0.5f;
 		obj.GetComponent<AsteroidsScript> ().wordPanel = panel;
 
 		asteroids.Add(obj);            

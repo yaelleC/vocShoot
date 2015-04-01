@@ -12,13 +12,14 @@ public class PlanetScript : MonoBehaviour {
 	public AudioClip fireBulletSound;
 	public AudioClip planetHitSound;
 	
-	private bool endWin = false;
-	private bool endLose = false;
+	private bool endWin;
+	private bool endLose;
 	Animator animator;
 
 	// Use this for initialization
 	void Start () {
-		
+		endWin = false;
+		endLose = false;
 		animator = GetComponent<Animator>();
 	}
 	

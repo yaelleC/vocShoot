@@ -285,12 +285,37 @@ public class EngAGe : MonoBehaviour {
 		print ("--- end Gameplay ---");
 		string winString = (win) ? "win" : "lose";
 		string URL = baseURL + "/gameplay/"+ idGameplay + "/end/" + winString;
+		print (URL);
+
+		Dictionary<string, string> headers2 = new Dictionary<string, string>();		
+		headers2.Add("Content-Type", "text/plain");
+
+		WWW www = new WWW(URL, Encoding.UTF8.GetBytes(winString), headers2);
+
+		// wait for the requst to finish
+		yield return www;
+			
+		if (www.error != null && !www.error.Equals(""))
+		{
+			print ("Error: " + www.error);
+		}
+		else 
+		{
+			print ("Gameplay Ended! return: " + www.text );
+		}
+	}	
+	
+	public IEnumerator endGameplay(String win)
+	{
+		print ("--- end Gameplay ---");
+		string URL = baseURL + "/gameplay/"+ idGameplay + "/end/" + win;
+		print (URL);
 		
-		WWW www = new WWW(URL, Encoding.UTF8.GetBytes(""), headers);
+		WWW www = new WWW(URL, Encoding.UTF8.GetBytes(win));
 		
 		// wait for the requst to finish
 		yield return www;
-						
+		
 		print ("Gameplay Ended! return: " + www.text);
 	}
 
