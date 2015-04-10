@@ -18,6 +18,7 @@ public class EngAGe : MonoBehaviour {
 	private static JSONArray scores = new JSONArray ();
 	private static JSONArray feedback = new JSONArray ();
 	private static JSONArray badgesWon = new JSONArray();
+	private static JSONArray badges = new JSONArray();
 	private static JSONNode leaderboard = new JSONNode();
 
 	private static JSONNode seriousGame = new JSONNode();
@@ -77,6 +78,10 @@ public class EngAGe : MonoBehaviour {
 	}
 	public JSONArray getBadges()
 	{
+		return badges;
+	}
+	public JSONArray getBadgesEarned()
+	{
 		return badgesWon;
 	}
 	public JSONNode getLeaderboardList()
@@ -89,8 +94,8 @@ public class EngAGe : MonoBehaviour {
 	}
 
 	// ************* Web services calls ****************** //
-	//private string baseURL = "http://docker:8080";
-	private string baseURL = "http://146.191.107.189:8080";
+	private string baseURL = "http://docker:8080";
+	//private string baseURL = "http://146.191.107.189:8080";
 
 
 	public IEnumerator loginStudent(int p_idSG, string p_username, string p_password, 
@@ -219,16 +224,17 @@ public class EngAGe : MonoBehaviour {
 					"}";
 		}
 		print (putDataString);
-
-		string URL = baseURL + "/gameplay/start";
+		
+		string URL = baseURL + "/gameplay/startGP";
 
 		WWW www = new WWW(URL, Encoding.UTF8.GetBytes(putDataString), headers);
 		
 		// wait for the requst to finish
 		yield return www;
 
-		
-		idGameplay = int.Parse(www.text);
+		JSONNode gpData = JSON.Parse(www.text);
+		idGameplay = gpData["idGameplay"].AsInt;
+		idPlayer = gpData["idPlayer"].AsInt;
 		
 		print ("Gameplay Started! id: " + idGameplay);
 		print ("--- getScores ---");
@@ -380,15 +386,16 @@ public class EngAGe : MonoBehaviour {
 	{
 		print ("--- get Badges ---");
 
-		string URL = baseURL + "/badges/seriousgame/" + p_idSG + "/version/" + version + "/player/" + idPlayer;
+		string URL = baseURL + "/badges/all/seriousgame/" + p_idSG + "/version/" + version + "/player/" + idPlayer;
 
 		WWW www = new WWW(URL);
 		
 		// wait for the requst to finish
 		yield return www;
 		
-		badgesWon = JSON.Parse(www.text).AsArray;
-		print ("Badges received! " + badgesWon.ToString());
+		badges = JSON.Parse(www.text).AsArray;
+
+		print ("Badges received! " + badges.ToString());
 	}
 
 	public IEnumerator getLeaderboard(int p_idSG)

@@ -211,7 +211,7 @@ public class GenerateAsteroidScript : MonoBehaviour {
 		transform3.anchoredPosition = new Vector2 (0,0);
 
 		
-		obj.GetComponent<Rigidbody2D> ().velocity = direction * speed * 0.5f;
+		obj.GetComponent<Rigidbody2D> ().velocity = direction * speed * 0.25f;
 		obj.GetComponent<AsteroidsScript> ().wordPanel = panel;
 
 		asteroids.Add(obj);            
