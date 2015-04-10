@@ -27,7 +27,7 @@ public class BadgeScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 		// if the badge is in EngAGe returned list, use the active image (color badge)
 		foreach (JSONNode b in badges)
 		{
-			if (string.Equals(b["name"], badgeName))
+			if (string.Equals(b["name"], badgeName) && b["earned"].AsBool)
 			{				
 				this.GetComponent<Image>().sprite = activeImage;
 			}
@@ -41,7 +41,7 @@ public class BadgeScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 		// if the badge is in EngAGe returned list, use the active image (color badge)
 		foreach (JSONNode b in engage.getBadges())
 		{
-			if (string.Equals(b["name"], badgeName))
+			if (string.Equals(b["name"], badgeName) && b["earned"].AsBool)
 			{				
 				this.GetComponent<Image>().sprite = activeImage;
 			}
@@ -59,10 +59,18 @@ public class BadgeScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 		// update the description to the message defined in the config file
 		// if no message is found the tooltip will display "description not available"
 		string desc = "description not available";
-		if ((sg ["feedback"] != null) && (sg ["feedback"][badgeName] != null))
+
+		foreach (JSONNode b in engage.getBadges())
+		{
+			if (string.Equals(b["name"], badgeName))
+			{				
+				desc = b["message"] + "\n ( " +b["playerNum"].AsFloat+ "/" +b["goalNum"]+ " )";
+			}
+		}
+		/*if ((sg ["feedback"] != null) && (sg ["feedback"][badgeName] != null))
 		{
 			desc = sg ["feedback"] [badgeName] ["message"];
-		}
+		}*/
 
 		showToolTip (data.position, desc);
 	}
