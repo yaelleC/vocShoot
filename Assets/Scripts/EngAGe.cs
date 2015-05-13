@@ -94,8 +94,8 @@ public class EngAGe : MonoBehaviour {
 	}
 
 	// ************* Web services calls ****************** //
-	private string baseURL = "http://docker:8080";
-	//private string baseURL = "http://146.191.107.189:8080";
+	//private string baseURL = "http://docker:8080";
+	private string baseURL = "http://146.191.107.189:8080";
 
 
 	public IEnumerator loginStudent(int p_idSG, string p_username, string p_password, 
