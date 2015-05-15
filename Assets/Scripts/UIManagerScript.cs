@@ -12,7 +12,7 @@ using System.Text.RegularExpressions;
 public class UIManagerScript : MonoBehaviour {
 
 	public EngAGe engage;
-	public const int idSG = 101;
+	public const int idSG = 128;
 
 	// MenuScene
 	public Animator startButton;

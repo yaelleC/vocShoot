@@ -1,0 +1,93 @@
+Serious-game
+  SGname : "vocShoot"
+  SGdeveloper : 2 
+   SGageRange : 10-99
+   SGlanguage : EN
+   SGcountry : UK
+   SGgenre : "space shooter"
+   SGsubject : "french, vocabulary"
+End
+
+Player
+    Age Int "How old are you?"
+    Language String "What is your mother tongue?"
+    Country String "Where are you from?"
+End
+
+Scores
+    overallScore "number of correct translations" 0
+    health "health of the French planet" 100
+End
+
+Feedback
+    correctTranslation "Yes, [frenchWord] is indeed French for [word]." positive
+    wrongTranslation "Nope, [frenchWord] is not French for [word]." positive
+    planetHit "Sorry, you were not quick enough to translate [word], the correct translation was [translation]" negative
+    
+  gold_medal "You translated correctly 200 words" badge
+  silver_medal "You translated correctly 100 words" badge
+  bronze_medal "You translated correctly 50 words" badge
+  
+  expert_time "You played more than 60 minutes" badge
+  master_time "You played more than 30 minutes" badge
+  novice_time "You played more than 10 minutes" badge
+  
+  effort "You played 5+ times" badge  
+  performance "You won 10+ times" badge
+  
+  end_win "Well done, you won the game :)" win
+  end_lose "Sorry, you lost the game :(" lose
+    
+    speedGame "You are too good, let's make thing more challenging" adaptation
+    slowGame "Hey, let's slow things down a bit" adaptation
+End
+
+Evidence-model
+    translate ( String frenchWord, String word )
+    "When the player type a word (french or english) to fire at the metorites"
+        overallScore -> 1
+            pomme, apple
+            poire, pear
+            fraise, strawberry
+            ananas, pineapple
+            figue, fig
+        End
+        overallScore -> 0
+            others
+        End
+        When
+            any(1): correctTranslation
+            any(0): wrongTranslation
+        End
+    End
+    
+    planetHit ( String word, LogOnly String translation )
+    "When a meteorite hits the planet" 
+        health -> -20
+            others
+        End
+        When
+            others: planetHit
+        End
+    End
+End
+
+Feedback-model
+  overallScore > 20 : end_win
+  overallScore > 10 : speedGame
+  health < 25 : slowGame
+  health < 1 : end_lose
+End
+
+Badge-model
+  	numberGameplays > 4 : effort
+	numberWin > 9 : performance
+	
+	totalTime > 60 : expert_time
+	totalTime > 30 : master_time
+	totalTime > 10 : novice_time
+	
+	sumScore overallScore > 199 : gold_medal
+	sumScore overallScore > 99 : silver_medal
+	sumScore overallScore > 49 : bronze_medal
+End

@@ -74,11 +74,11 @@ public class PlanetScript : MonoBehaviour {
 	{
 		if (collider.gameObject.CompareTag ("Asteroid")) 
 		{
-			string wordToTranslate = collider.gameObject.name.Split('_')[0];
-			string correctTranslation = collider.gameObject.name.Split('_')[1];
+			string word = collider.gameObject.name.Split('_')[0];
+			string translation = collider.gameObject.name.Split('_')[1];
 
-			JSONNode values = JSON.Parse("{ \"toTranslate\" : \"" + wordToTranslate + "\", " +
-			                             "\"correctWord\" : \"" + correctTranslation + "\" }");
+			JSONNode values = JSON.Parse("{ \"word\" : \"" + word + "\", " +
+			                             "\"translation\" : \"" + translation + "\" }");
 			StartCoroutine(engage.assess("planetHit", values, uiScript.UpdateFeedbackAndScore));
 
 			AudioSource.PlayClipAtPoint(planetHitSound, transform.position);
