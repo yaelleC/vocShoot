@@ -306,6 +306,8 @@ public class UIManagerScript : MonoBehaviour {
 		{
 			string scoreName = score["name"];
 			string scoreValue = score["value"];
+
+			// TODO : have only one label for overall score
 			
 			if (string.Equals(scoreName, "englishToFrench"))
 			{
@@ -325,13 +327,6 @@ public class UIManagerScript : MonoBehaviour {
 					float newSize = healthSize*(currentValue/startingValue);
 					health.rectTransform.sizeDelta = new Vector2(newSize, 24f); 
 				}
-				/*int lives = Mathf.RoundToInt(livesFloat);
-				
-				life3.gameObject.SetActive(lives > 66);
-				life2.gameObject.SetActive(lives > 33);
-				life1.gameObject.SetActive(lives > 0);*/
-
-
 			}
 		}
 	}
