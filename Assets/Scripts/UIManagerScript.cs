@@ -12,7 +12,7 @@ using System.Text.RegularExpressions;
 public class UIManagerScript : MonoBehaviour {
 
 	public EngAGe engage;
-	public const int idSG = 128;
+	public const int idSG = 131;
 
 	// MenuScene
 	public Animator startButton;
@@ -48,8 +48,7 @@ public class UIManagerScript : MonoBehaviour {
 	public PlanetScript planet;
 	public GenerateAsteroidScript astScript;
 	
-	public Text pointsFRtoENLabel;
-	public Text pointsENtoFRLabel;
+	public Text pointsLabel;
 	public GameObject restartWinDialog;
 	public GameObject restartLoseDialog;
 	
@@ -81,6 +80,12 @@ public class UIManagerScript : MonoBehaviour {
 		{
 			txtWelcome.text = "Welcome " + username ;			
 			int i = 0;
+
+			if (engage.getParameters().Count == 0)
+			{
+				Application.LoadLevel("MenuScene");
+			}
+
 			// loop on all the player's characteristics needed
 			foreach (JSONNode param in engage.getParameters())
 			{
@@ -88,7 +93,7 @@ public class UIManagerScript : MonoBehaviour {
 				InputField inputParam = (InputField)Instantiate(inputPrefab);
 				inputParam.name = "input_" + param["name"];
 				inputParam.transform.SetParent(inputParent.transform);
-				inputParam.text = "Enter your " + param["name"] + " ("+param["type"]+")";
+				inputParam.text = param["question"] + " (" + param["type"] + ")"; 
 
 				// position them, aligned vertically
 				RectTransform transform = inputParam.transform as RectTransform;   
@@ -158,13 +163,11 @@ public class UIManagerScript : MonoBehaviour {
 	public void RestartGame()
 	{
 		Time.timeScale = 1;
-		//Application.LoadLevel("GameScene");
 		StartCoroutine (engage.startGameplay(idSG, "GameScene"));
 	}
 	
 	public void StartGame()
 	{
-		//Application.LoadLevel("GameScene");
 		StartCoroutine (engage.startGameplay(idSG, "GameScene"));
 	}
 	
@@ -172,14 +175,12 @@ public class UIManagerScript : MonoBehaviour {
 	{
 		username = txtUsername.text;
 		password = txtPassword.text;
-		
-		//Application.LoadLevel("ParametersScene");
+
 		StartCoroutine(engage.loginStudent(idSG, username, password, "LoginScene", "MenuScene", "ParametersScene"));
 	}
 
 	public void GetStartedGuest()
 	{
-		//Application.LoadLevel("ParametersScene");
 		StartCoroutine(engage.guestLogin(idSG, "LoginScene", "ParametersScene"));
 	}
 
@@ -253,7 +254,7 @@ public class UIManagerScript : MonoBehaviour {
 		JSONNode leaderboard = engage.getLeaderboardList ();
 		
 		// look only at the eu_score 
-		JSONArray overallScorePerf = leaderboard ["overallScore"].AsArray;
+		JSONArray overallScorePerf = leaderboard ["shortestGameplays"].AsArray;
 		
 		// display up to 10 best gameplays
 		int max = 10;
@@ -263,8 +264,11 @@ public class UIManagerScript : MonoBehaviour {
 			if (max-- > 0)
 			{
 				// each gameplay has a "name" and a "score"
-				float score = gameplay["score"].AsFloat ;
-				txt_listBestPlayers.text += score + " - " + gameplay["name"] + "\n";
+				int score = gameplay["score"].AsInt ;
+				int seconds = score % 60;
+				int minutes = (score - seconds)/60;
+
+				txt_listBestPlayers.text += minutes + "'" + seconds + " - " + gameplay["name"] + "\n";
 			}
 		}
 		// open the window
@@ -309,13 +313,9 @@ public class UIManagerScript : MonoBehaviour {
 
 			// TODO : have only one label for overall score
 			
-			if (string.Equals(scoreName, "englishToFrench"))
+			if (string.Equals(scoreName, "overallScore"))
 			{
-				pointsENtoFRLabel.text = float.Parse(scoreValue).ToString();
-			}
-			else if (string.Equals(scoreName, "frenchToEnglish"))
-			{
-				pointsFRtoENLabel.text = float.Parse(scoreValue).ToString();
+				pointsLabel.text = float.Parse(scoreValue).ToString();
 			}
 			else if (string.Equals(scoreName, "health"))
 			{

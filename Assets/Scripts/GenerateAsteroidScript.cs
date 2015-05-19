@@ -85,14 +85,29 @@ public class GenerateAsteroidScript : MonoBehaviour {
 			{
 				if (ast != null)
 				{
-					string wordToTranslate = ast.name.Split('_')[0];
-					string correctTranslation = ast.name.Split('_')[1];
+					string[] data = ast.name.Split('_');
+					string wordToTranslate = data[0];
+					string correctTranslation = data[1];
+					string sideTranslation = data[2];
+
 					if (wordTyped.Equals(correctTranslation))
 					{
-						JSONNode values = JSON.Parse("{ \"toTranslate\" : \"" + wordToTranslate + "\", " +
-					                             "\"translated\" : \"" + wordTyped + "\" }");
-						StartCoroutine(engage.assess("translation", values, uiScript.UpdateFeedbackAndScore));
+						string frenchWord = (string.Equals(sideTranslation, "FRtoEN"))? wordToTranslate : correctTranslation;
+						string word = (string.Equals(sideTranslation, "FRtoEN"))? correctTranslation : wordToTranslate;
+
+						JSONNode values = JSON.Parse("{ \"frenchWord\" : \"" + frenchWord + "\", " +
+						                             "\"word\" : \"" + word + "\" }");
+						StartCoroutine(engage.assess("translate", values, uiScript.UpdateFeedbackAndScore));
 						planet.FireBullet(ast.transform.position.x, ast.transform.position.y);
+					}
+					else 
+					{
+						string frenchWord = (string.Equals(sideTranslation, "FRtoEN"))? wordToTranslate : wordTyped;
+						string word = (string.Equals(sideTranslation, "FRtoEN"))? wordTyped : wordToTranslate;
+						
+						JSONNode values = JSON.Parse("{ \"frenchWord\" : \"" + frenchWord + "\", " +
+						                             "\"word\" : \"" + word + "\" }");
+						StartCoroutine(engage.assess("translate", values, uiScript.UpdateFeedbackAndScore));
 					}
 				}
 			}
@@ -121,7 +136,7 @@ public class GenerateAsteroidScript : MonoBehaviour {
 			JSONNode gameJSON = engage.getSG ();
 			try
 			{
-				JSONArray reactions = gameJSON["evidenceModel"]["translation"]["reactions"].AsArray;
+				JSONArray reactions = gameJSON["evidenceModel"]["translate"]["reactions"].AsArray;
 				foreach(JSONNode reaction in reactions)
 				{
 					if (reaction["values"] != null)
@@ -139,11 +154,25 @@ public class GenerateAsteroidScript : MonoBehaviour {
 			}
 		}
 		int randomWord = Random.Range (0, availableWords.Count);
+		int randomSprite = Random.Range (0, availableAsteroids.Length);
+		
+		string wordToTranslate = "";
+		string correctTranslation = "";
+		string sideTranslation = "";
 
-		string wordToTranslate = availableWords[randomWord]["toTranslate"];
-		string correctTranslation = availableWords[randomWord]["translated"];
+		// rock => FR to EN and asteroide => EN to FR
+		if (randomSprite == 1) {			
+			wordToTranslate = availableWords [randomWord] ["frenchWord"];
+			correctTranslation = availableWords [randomWord] ["word"];
+			sideTranslation = "FRtoEN";
+		} else {
+			wordToTranslate = availableWords [randomWord] ["word"];
+			correctTranslation = availableWords [randomWord] ["frenchWord"];
+			sideTranslation = "ENtoFR";
+		}
+
 		GameObject obj = (GameObject)Instantiate(asteroid);
-		obj.name = wordToTranslate + "_" + correctTranslation;
+		obj.name = wordToTranslate + "_" + correctTranslation + "_" + sideTranslation;
 
 		GameObject panel = (GameObject)Instantiate (panelWord);
 		Text text = (Text)Instantiate (textWord);
@@ -178,8 +207,7 @@ public class GenerateAsteroidScript : MonoBehaviour {
 		
 		float rotation = Random.Range(-45, 45);
 		obj.transform.rotation = Quaternion.Euler(Vector3.forward * rotation);
-		
-		int randomSprite = Random.Range (0, availableAsteroids.Length);
+
 		obj.GetComponent<SpriteRenderer> ().sprite = (Sprite) availableAsteroids [randomSprite];
 		
 		Vector2 target = Vector2.zero;
