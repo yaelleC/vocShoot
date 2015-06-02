@@ -140,6 +140,11 @@ public class UIManagerScript : MonoBehaviour {
 		}
 	}
 
+	public void Update() {
+		if (Input.GetKeyDown("escape")) 
+			Application.Quit();
+	}
+
 	public void GoToMenu()
 	{
 		Time.timeScale = 1;
